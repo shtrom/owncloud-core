@@ -165,6 +165,7 @@ class ViewController extends Controller {
 		\OCP\Util::addscript('files', 'jquery.fileupload');
 		\OCP\Util::addscript('files', 'jquery-visibility');
 		\OCP\Util::addscript('files', 'fileinfomodel');
+		\OCP\Util::addscript('files', 'fileinfocollection');
 		\OCP\Util::addscript('files', 'filesummary');
 		\OCP\Util::addscript('files', 'breadcrumb');
 		\OCP\Util::addscript('files', 'filelist');
