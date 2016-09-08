@@ -825,15 +825,17 @@ OC.Uploader.prototype = _.extend({
 						selection.totalBytes += file.size;
 					}
 
-					// check free space
-					freeSpace = $('#free_space').val();
-					if (freeSpace >= 0 && selection.totalBytes > freeSpace) {
-						data.textStatus = 'notenoughspace';
-						data.errorThrown = t('files',
-							'Not enough free space, you are uploading {size1} but only {size2} is left', {
-							'size1': humanFileSize(selection.totalBytes),
-							'size2': humanFileSize($('#free_space').val())
-						});
+					// check free space before attempting upload, if available
+					if (self.fileList && self.fileList.getDirectoryInfo()) {
+						freeSpace = self.fileList.getDirectoryInfo().freeSpace;
+						if (freeSpace >= 0 && selection.totalBytes > freeSpace) {
+							data.textStatus = 'notenoughspace';
+							data.errorThrown = t('files',
+								'Not enough free space, you are uploading {size1} but only {size2} is left', {
+								'size1': humanFileSize(selection.totalBytes),
+								'size2': humanFileSize(freeSpace)
+							});
+						}
 					}
 
 					// end upload for whole selection on error
@@ -1057,6 +1059,7 @@ OC.Uploader.prototype = _.extend({
 
 					self.clear();
 					self._hideProgressBar();
+					self.trigger('stop', e, data);
 				});
 				fileupload.on('fileuploadfail', function(e, data) {
 					self.log('progress handle fileuploadfail', e, data);
