@@ -34,6 +34,7 @@ use OCA\DAV\HookManager;
 use \OCP\AppFramework\App;
 use OCP\AppFramework\IAppContainer;
 use OCP\Contacts\IManager;
+use OCP\IUser;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
 class Application extends App {
@@ -128,6 +129,16 @@ class Application extends App {
 		$hm = $this->getContainer()->query('HookManager');
 		$hm->setup();
 
+		$dispatcher = $this->getContainer()->getServer()->getEventDispatcher();
+
+		// first time login event setup
+		$dispatcher->addListener(IUser::class . '::firstLogin', function ($event) use ($hm) {
+			if ($event instanceof GenericEvent) {
+				$hm->firstLogin($event->getSubject());
+			}
+		});
+
+		// carddav/caldav sync event setup
 		$listener = function($event) {
 			if ($event instanceof GenericEvent) {
 				/** @var BirthdayService $b */
@@ -140,7 +151,6 @@ class Application extends App {
 			}
 		};
 
-		$dispatcher = $this->getContainer()->getServer()->getEventDispatcher();
 		$dispatcher->addListener('\OCA\DAV\CardDAV\CardDavBackend::createCard', $listener);
 		$dispatcher->addListener('\OCA\DAV\CardDAV\CardDavBackend::updateCard', $listener);
 		$dispatcher->addListener('\OCA\DAV\CardDAV\CardDavBackend::deleteCard', function($event) {
